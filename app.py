@@ -34,9 +34,9 @@ app = Flask(__name__)
 
 @app.route("/")
 def welcome():
-    """List all available api routes."""
+    """Available api routes."""
     return (
-        f"Available Routes:<br/>"
+        f"Routes:<br/>"
         f"/api/v1.0/names<br/>"
         f"/api/v1.0/players"
         f"/api/v1.0/player_games"
@@ -84,14 +84,14 @@ def players():
     return jsonify(all_players)
 
 # TODO: Create route for player games
-# @app.route("/api/v1.0/player_games")
-# def players():
-#     # Create our session (link) from Python to the DB
-#     session = Session(engine)
+@app.route("/api/v1.0/player_games")
+def player_game():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
 
-#     """Return a list of passenger data including the name, age, and sex of each passenger"""
-#     # Query all passengers
-#     results = session.query(Player.name, Player.position_id).all()
+    """Return a list of player game data"""
+    # Query all passengers
+    results = session.query(PlayerGame.Player.Name, PlayerGame.Game.Week, PlayerGame.).all()
 
 #     session.close()
 
