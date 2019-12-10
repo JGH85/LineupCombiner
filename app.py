@@ -5,7 +5,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, redirect
 
 
 #################################################
@@ -32,20 +32,24 @@ app = Flask(__name__)
 # Flask Routes
 #################################################
 
-@app.route("/")
-def welcome():
-    """Available api routes."""
-    return (
-        f"Routes:<br/>"
-        f"/api/names<br/>"
-        f"/api/players<br/>"
-        f"/api/player_stats/'name'*<br/>"
-        f"/api/player_games<br/>"
-        f"*Name searches for any player names containing the input text, regardless of case.<br/>"
-        f" Names are stored in format 'Last, First'<br/>"
+# @app.route("/")
+# def welcome():
+#     """Available api routes."""
+#     return (
+#         f"Routes:<br/>"
+#         f"/api/names<br/>"
+#         f"/api/players<br/>"
+#         f"/api/player_stats/'name'*<br/>"
+#         f"/api/player_games<br/>"
+#         f"*Name searches for any player names containing the input text, regardless of case.<br/>"
+#         f" Names are stored in format 'Last, First'<br/>"
 
 
-    )
+#     )
+
+@app.route('/')
+def index():
+    return render_template("index.html")
 
 
 @app.route("/api/names")
@@ -132,7 +136,7 @@ def player_stats(name=None):
 
     # Create our session (link) from Python to the DB
     session = Session(engine)
-    if name == "":
+    if name == "''":
         return "Player stat search requires a player name."
     
     searchname = name
