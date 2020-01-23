@@ -155,6 +155,7 @@ def player_stats(name=None):
         for pg in player.player_game_collection:
             game_dict = {}
             game_dict["week"] = pg.game.week
+            game_dict["year"] = pg.game.year
             game_dict["dk_salary"] = pg.dk_salary
             game_dict["fd_salary"] = pg.fd_salary
             game_dict["dk_points"] = pg.dk_points
@@ -171,24 +172,6 @@ def player_stats(name=None):
 @app.route("/api/player_stats_year/<year>/<name>")
 # @app.route("/api/v1.0/temp/<start>/<end>")
 def player_stats_year(year=None, name=None):
-    # # Select statement
-    # sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
-
-    # if not end:
-    #     # calculate TMIN, TAVG, TMAX for dates greater than start
-    #     results = session.query(*sel).\
-    #         filter(Measurement.date >= start).all()
-    #     # Unravel results into a 1D array and convert to a list
-    #     temps = list(np.ravel(results))
-    #     return jsonify(temps)
-
-    # # calculate TMIN, TAVG, TMAX with start and stop
-    # results = session.query(*sel).\
-    #     filter(Measurement.date >= start).\
-    #     filter(Measurement.date <= end).all()
-    # # Unravel results into a 1D array and convert to a list
-    # temps = list(np.ravel(results))
-
     # Create our session (link) from Python to the DB
     session = Session(engine)
     if year == "''":
@@ -196,7 +179,8 @@ def player_stats_year(year=None, name=None):
     
     if name == "''":
         return "Player stat search requires a player name."
-    
+
+    year = int(year)
     searchname = name
     searchstring = f"%{searchname}%"
     results = session.query(Player).filter(Player.name.ilike(searchstring))
@@ -211,13 +195,17 @@ def player_stats_year(year=None, name=None):
         player_stats_dict["position"] = player.position.position_name
         player_games = []
         for pg in player.player_game_collection:
-            game_dict = {}
-            game_dict["week"] = pg.game.week
-            game_dict["dk_salary"] = pg.dk_salary
-            game_dict["fd_salary"] = pg.fd_salary
-            game_dict["dk_points"] = pg.dk_points
-            game_dict["fd_points"] = pg.fd_points
-            player_games.append(game_dict)
+            # only add the data from the specified year
+            # at some point it would be better to do this ahead of time in the query but this works for now
+            if (pg.game.year == year):
+                game_dict = {}
+                game_dict["week"] = pg.game.week
+                game_dict["year"] = pg.game.year
+                game_dict["dk_salary"] = pg.dk_salary
+                game_dict["fd_salary"] = pg.fd_salary
+                game_dict["dk_points"] = pg.dk_points
+                game_dict["fd_points"] = pg.fd_points
+                player_games.append(game_dict)
         player_stats_dict["games"] = player_games
 
         all_player_stats.append(player_stats_dict)
