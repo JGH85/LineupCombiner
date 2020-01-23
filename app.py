@@ -167,6 +167,64 @@ def player_stats(name=None):
     return jsonify(all_player_stats)
 
 
+# TODO: Create route for player stats
+@app.route("/api/player_stats_year/<year>/<name>")
+# @app.route("/api/v1.0/temp/<start>/<end>")
+def player_stats_year(year=None, name=None):
+    # # Select statement
+    # sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+
+    # if not end:
+    #     # calculate TMIN, TAVG, TMAX for dates greater than start
+    #     results = session.query(*sel).\
+    #         filter(Measurement.date >= start).all()
+    #     # Unravel results into a 1D array and convert to a list
+    #     temps = list(np.ravel(results))
+    #     return jsonify(temps)
+
+    # # calculate TMIN, TAVG, TMAX with start and stop
+    # results = session.query(*sel).\
+    #     filter(Measurement.date >= start).\
+    #     filter(Measurement.date <= end).all()
+    # # Unravel results into a 1D array and convert to a list
+    # temps = list(np.ravel(results))
+
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    if year == "''":
+        return "Player year stat search requires a year."
+    
+    if name == "''":
+        return "Player stat search requires a player name."
+    
+    searchname = name
+    searchstring = f"%{searchname}%"
+    results = session.query(Player).filter(Player.name.ilike(searchstring))
+
+    session.close()
+
+    # Create a dictionary from the row data and append to a list of all players
+    all_player_stats = []
+    for player in results:
+        player_stats_dict = {}
+        player_stats_dict["name"] = player.name
+        player_stats_dict["position"] = player.position.position_name
+        player_games = []
+        for pg in player.player_game_collection:
+            game_dict = {}
+            game_dict["week"] = pg.game.week
+            game_dict["dk_salary"] = pg.dk_salary
+            game_dict["fd_salary"] = pg.fd_salary
+            game_dict["dk_points"] = pg.dk_points
+            game_dict["fd_points"] = pg.fd_points
+            player_games.append(game_dict)
+        player_stats_dict["games"] = player_games
+
+        all_player_stats.append(player_stats_dict)
+
+    return jsonify(all_player_stats)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
